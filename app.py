@@ -12,6 +12,8 @@ import pandas as pd
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 ConfirmedCases_raw=pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv')
 Deaths_raw=pd.read_csv('https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
@@ -64,7 +66,6 @@ df_top = df_top[df_top['Country/Region'].isin(
 )]
 
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 colors = {
         'background': '#111111',
