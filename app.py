@@ -52,8 +52,8 @@ ConfirmedCases = cleandata(ConfirmedCases_raw)
 DeathCases = cleandata(Deaths_raw)
 RecoveryCases = cleandata(Recoveries_raw)
 
-df_ontario = ontario_data()
-df_chile = chile_data()
+df_ontario = ontario_data().tail(30)
+df_chile = chile_data().tail(30)
 top_10_countries = ConfirmedCases.max(level=0)['Cases'].reset_index().sort_values('Cases', ascending=False).head(10)
 df_ontario['new cases'] = df_ontario['Cases'].diff()
 df_favs = df_favs()
@@ -64,8 +64,6 @@ df_top = df_top.reset_index().drop(columns=['Province/State', 'Lat', 'Long'])
 df_top = df_top[df_top['Country/Region'].isin(
     top_10_countries.head(5)['Country/Region'].to_list()
 )]
-
-
 
 colors = {
         'background': '#111111',
@@ -87,8 +85,7 @@ app.layout = html.Div(children=[
             figure = {'data':[
                 go.Bar(x=top_10_countries['Country/Region'],
                     y=top_10_countries['Cases'],
-                    text = top_10_countries['Cases'],
-                    textposition='outside'),
+                    text = top_10_countries['Cases'], textposition='outside'),
                 ],
                 'layout': {
                     'plot_bgcolor': colors['background'],
