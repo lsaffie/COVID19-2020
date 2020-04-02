@@ -81,6 +81,12 @@ def plot_timeseries_canada_province():
                 figure = px.line(df, x="date", y="Cases", title="Canada by Province", text=df["Cases"], color="Province/State")),)
 
 def plot_top_countries():
+    df_top = ConfirmedCases
+    df_top = df_top.reset_index().drop(columns=['Province/State'])
+    df_top = df_top[df_top['Country/Region'].isin(
+        top_10_countries.head(5)['Country/Region'].to_list()
+    )]
+    df_top = df_top.sort_values('Cases', ascending=False)
     return html.Div(
             dcc.Graph(id='top_countries',
                 figure = px.line(df_top, x="date", y='Cases', title="Top Countries", text=df_top["Cases"], color="Country/Region"))
@@ -93,13 +99,6 @@ top_10_countries = ConfirmedCases.groupby('Country/Region').max().sort_values('C
 df_ontario['new cases'] = df_ontario['Cases'].diff()
 df_ontario['new cases3'] = df_ontario['Cases'].diff(3)
 df_favs = df_favs()
-
-## Top countries
-df_top = ConfirmedCases
-df_top = df_top.reset_index().drop(columns=['Province/State'])
-df_top = df_top[df_top['Country/Region'].isin(
-    top_10_countries.head(5)['Country/Region'].to_list()
-)]
 
 colors = {
         'background': '#111111',
@@ -158,7 +157,7 @@ app.layout = html.Div(children=[
             )],
         ),
 
-    ], style={'width': '100%', 'display': 'inline-block'})
+    ], style={'width': '80%', 'align-content': 'center', 'display': 'inline-block'})
 
 if __name__ == '__main__':
     app.run_server(debug=True)
