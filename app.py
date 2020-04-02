@@ -74,6 +74,7 @@ def plot_ontario_new_cases(column="new cases", title="Ontario New Cases"):
 def plot_timeseries_canada_province():
     df = ConfirmedCases[ConfirmedCases['Country/Region'] == "Canada"]
     df = df.groupby(['date', 'Province/State']).max().reset_index().tail(300)
+    df = df.sort_values('Cases', ascending=False)
     return html.Div(
             dcc.Graph(
                 id='canada-province-graph',
