@@ -64,9 +64,11 @@ DeathCases = cleandata(Deaths_raw)
 RecoveryCases = cleandata(Recoveries_raw)
 
 df_ontario = ontario_data().tail(30)
-df_chile = chile_data().tail(30)
+df_chile = country_df("Chile").tail(30)
+df_us= country_df("US").tail(30)
 top_10_countries = ConfirmedCases.max(level=0)['Cases'].reset_index().sort_values('Cases', ascending=False).head(10)
 df_ontario['new cases'] = df_ontario['Cases'].diff()
+df_ontario['new cases3'] = df_ontario['Cases'].diff(3)
 df_favs = df_favs()
 
 ## Top countries
@@ -109,38 +111,20 @@ app.layout = html.Div(children=[
             ),
         ),
 
-    html.Div(
-        dcc.Graph(
-            id='ontario-graph',
-            figure = px.line(df_ontario,
-                x="Date",
-                y="Cases",
-                title="Ontario Confirmed Cases",
-                text=df_ontario["Cases"],
-                ),
-            ),
-        ),
-
-    html.Div(
-        dcc.Graph(
-            id='ontario-growth',
-            figure = px.line(df_ontario, x="Date", y="new cases", title="Ontario Daily New Cases", text=df_ontario['new cases']),
-        ),
-    ),
-
-    html.Div(
-        dcc.Graph(
-            id='top-growth',
-            figure = px.line(df_top, x='Date', y='Cases', color='Country/Region', title="top countries")
-        ),
-    ),
-
-    html.Div(
-        dcc.Graph(
-            id='chile-graph',
-            figure = px.line(df_chile, x="Date", y="Cases", title="Chile Confirmed Cases", text=df_chile['Cases']),
-        ),
-    ),
+    plot_timeseries_country("Canada", "Canada Confirmed Cases")
+    ,
+    plot_timeseries_df(df_ontario, "Ontario Confirmed Cases", "Cases")
+    ,
+    plot_timeseries_df(df_ontario, "Ontario Daily New Cases", "new cases")
+    ,
+    plot_timeseries_df(df_ontario, "Ontario Daily New Cases (3 days)", "new cases3")
+    ,
+    plot_timeseries_df(df_top, "Top Countries", "Cases")
+    ,
+    plot_timeseries_country("US", "US Confirmed Cases")
+    ,
+    plot_timeseries_country("Chile", "Chile Confirmed Cases")
+    ,
 
     html.Div([
         dash_table.DataTable( id='table',
