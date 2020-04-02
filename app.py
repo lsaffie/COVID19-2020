@@ -32,8 +32,8 @@ def ontario_data():
     df = df.reset_index().drop(columns=['Province/State', 'Lat', 'Long', 'Country/Region'])
     return df
 
-def chile_data():
-    df = ConfirmedCases.loc["Chile"]
+def country_df(country):
+    df = ConfirmedCases.loc[country]
     df = df.reset_index().drop(columns=['Province/State', 'Lat', 'Long'])
     return df
 
