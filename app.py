@@ -46,6 +46,17 @@ def df_favs():
 
     return df_favs.set_index('Date')
 
+def plot_timeseries_country(country, title):
+    df = country_df(country).tail(30)
+    return plot_timeseries_df(df, title, "Cases")
+
+def plot_timeseries_df(df, title, series):
+    return html.Div(
+            dcc.Graph(
+                id=title + '-graph',
+                figure = px.line(df, x="Date", y="Cases", title=title, text=df[series])),
+            )
+
 
 ## Clean all datasets
 ConfirmedCases = cleandata(ConfirmedCases_raw)
