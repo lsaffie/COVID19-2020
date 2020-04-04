@@ -30,17 +30,24 @@ def loadData(fileName, columnName):
 
 ConfirmedCases = loadData(
     "time_series_covid19_confirmed_global.csv", "Cases")
+DeathCases = loadData("time_series_covid19_deaths_global.csv", "DeathCases")
+Cases = ConfirmedCases.merge(DeathCases)
 
 
 # convert dates into rows
 
 def ontario_data():
-    df = ConfirmedCases[ConfirmedCases['Province/State'] == "Ontario"]
+    df = Cases[Cases['Province/State'] == "Ontario"]
     df = df.reset_index().drop(columns=['Province/State', 'Country/Region'])
     return df
 
+def canada_data():
+    df = Cases[Cases['Country/Region'] == "Canada"]
+    df = df.reset_index().drop(columns=['Province/State', 'Country/Region'])
+    return df.groupby('date').sum().reset_index()
+
 def country_df(country):
-    df = ConfirmedCases[ConfirmedCases['Country/Region'] == country]
+    df = Cases[Cases['Country/Region'] == country]
     df = df.reset_index().drop(columns=['Province/State'])
     return df.groupby('date').sum().reset_index()
 
@@ -54,15 +61,15 @@ def df_favs():
 
     return df_favs.set_index('date')
 
-def plot_timeseries_country(country, title):
+def plot_timeseries_country(country, title, axis="Cases"):
     df = country_df(country).tail(30)
-    return plot_timeseries_df(df, title, "Cases")
+    return plot_timeseries_df(df, title, axis)
 
 def plot_timeseries_df(df, title, series):
     return html.Div(
             dcc.Graph(
                 id=title + '-graph',
-                figure = px.line(df, x="date", y="Cases", title=title, text=df[series])),
+                figure = px.line(df, x="date", y=series, title=title, text=df[series])),
             )
 
 def plot_ontario_new_cases(column="new cases", title="Ontario New Cases"):
@@ -92,7 +99,27 @@ def plot_top_countries():
                 figure = px.line(df_top, x="date", y='Cases', title="Top Countries", text=df_top["Cases"], color="Country/Region"))
             )
 
+def plot_canada_death_rate():
+    df = Cases[Cases['Country/Region'] == "Canada"]
+    df = df.groupby(['date']).max().reset_index()
+    df["DeathRate"] = (df["DeathCases"]/df["Cases"]).round(3)
+    return html.Div(
+            dcc.Graph(id='canada_death_rate',
+            figure = px.line(df, x="date", y="DeathRate", title="Canada Death Rate", text=df["DeathRate"])
+            )
+        )
+
+def plot_ontario_death_rate():
+    df = df_ontario
+    df["DeathRate"] = (df["DeathCases"]/df["Cases"]).round(3)
+    return html.Div(
+            dcc.Graph(id='ontario_death_rate',
+            figure = px.line(df, x="date", y="DeathRate", title="Ontario Death Rate", text=df["DeathRate"])
+            )
+        )
+
 df_ontario = ontario_data().tail(30)
+df_canada = canada_data()
 df_chile = country_df("Chile").tail(30)
 df_us= country_df("US").tail(30)
 top_10_countries = ConfirmedCases.groupby('Country/Region').max().sort_values('Cases', ascending=False).head(10).reset_index()
@@ -137,11 +164,17 @@ app.layout = html.Div(children=[
     ,
     plot_timeseries_canada_province()
     ,
+    plot_timeseries_df(df_canada, "Canada Death Cases", "DeathCases")
+    ,
+    plot_canada_death_rate()
+    ,
     plot_timeseries_df(df_ontario, "Ontario Confirmed Cases", "Cases")
     ,
     plot_ontario_new_cases()
     ,
-    plot_ontario_new_cases("new cases3", "Ontario New Cases (3 day aggregation)")
+    plot_timeseries_df(df_ontario, "Ontario Death Cases", "DeathCases")
+    ,
+    plot_ontario_death_rate()
     ,
     plot_top_countries()
     ,
